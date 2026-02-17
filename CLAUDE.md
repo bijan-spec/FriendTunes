@@ -1,4 +1,4 @@
-# RadioFriends - Project Notes
+# RadioFam - Project Notes
 
 ## What This Is
 A web app where a group of friends share their recently liked Spotify songs. Each friend connects their Spotify account, and the feed shows everyone's liked songs in reverse chronological order with embedded Spotify players. Users can hide tracks and leave comments.
@@ -63,7 +63,7 @@ A web app where a group of friends share their recently liked Spotify songs. Eac
 ## Version History
 
 ### v.2 (February 2026)
-- Renamed from FriendTunes to RadioFriends
+- Renamed from FriendTunes to RadioFam
 - Fixed doubled-up track display (removed duplicate song info, kept Spotify embed only)
 - Moved Connect Spotify to inline link under title
 - Added user session via cookie
