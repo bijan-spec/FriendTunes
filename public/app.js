@@ -73,7 +73,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var avatar = user.image
           ? '<img src="' + esc(user.image) + '" alt="' + esc(user.name) + '">'
           : '<div class="no-image">' + esc(user.name.charAt(0).toUpperCase()) + '</div>';
-        return '<div class="friend-avatar">' + avatar + '<span>' + esc(user.name) + '</span></div>';
+        var profileUrl = 'https://open.spotify.com/user/' + encodeURIComponent(user.id);
+        return '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="friend-avatar">' + avatar + '<span>' + esc(user.name) + '</span></a>';
       })
       .join('');
   }
@@ -93,9 +94,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     feedEl.innerHTML = songs
       .map(function (song) {
-        var avatar = song.liked_by.image
+        var profileUrl = 'https://open.spotify.com/user/' + encodeURIComponent(song.liked_by.id);
+        var avatarImg = song.liked_by.image
           ? '<img src="' + esc(song.liked_by.image) + '" alt="' + esc(song.liked_by.name) + '">'
           : '<div class="no-image-sm">' + esc(song.liked_by.name.charAt(0).toUpperCase()) + '</div>';
+        var avatar = '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="avatar-link">' + avatarImg + '</a>';
 
         var hideBtn = currentUserId
           ? '<button class="hide-btn" data-track-id="' + song.track.id + '" data-liked-by="' + song.liked_by.id + '" title="Hide from feed">&times;</button>'

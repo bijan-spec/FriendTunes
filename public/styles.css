@@ -183,11 +183,18 @@ header h1 {
     display: none;
 }
 
-.friend-avatar {
+a.friend-avatar {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
+    text-decoration: none;
+    color: inherit;
+}
+
+.avatar-link {
+    display: flex;
     flex-shrink: 0;
 }
 
