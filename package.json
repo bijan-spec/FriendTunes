@@ -1,0 +1,9 @@
+{
+  "name": "friendtunes",
+  "version": "1.0.0",
+  "description": "Share liked songs with friends via Spotify",
+  "private": true,
+  "dependencies": {
+    "@upstash/redis": "^1.28.0"
+  }
+}
