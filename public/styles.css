@@ -35,13 +35,23 @@ body::before {
     padding: 24px 16px;
 }
 
-/* About Link */
+/* Header Links */
+.header-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.header-dot {
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 14px;
+}
+
 .about-link {
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: rgba(255, 255, 255, 0.35);
-    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
     font-weight: 500;
     text-decoration: none;
     transition: color 0.2s;
@@ -146,8 +156,6 @@ header h1 {
 }
 
 .connect-link {
-    display: inline-block;
-    margin-top: 8px;
     color: #1DB954;
     font-size: 14px;
     font-weight: 500;
