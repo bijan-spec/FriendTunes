@@ -38,7 +38,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // Event delegation for hide buttons and comment inputs
   feedEl.addEventListener('click', function (e) {
     var hideBtn = e.target.closest('.hide-btn');
-    if (hideBtn) handleHide(hideBtn);
+    if (hideBtn) { handleHide(hideBtn); return; }
+    var deleteBtn = e.target.closest('.comment-delete');
+    if (deleteBtn) handleDeleteComment(deleteBtn);
   });
 
   feedEl.addEventListener('keydown', function (e) {
@@ -100,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
           : '<div class="no-image-sm">' + esc(song.liked_by.name.charAt(0).toUpperCase()) + '</div>';
         var avatar = '<a href="' + profileUrl + '" target="_blank" rel="noopener" class="avatar-link">' + avatarImg + '</a>';
 
-        var hideBtn = currentUserId
+        var hideBtn = (currentUserId && currentUserId === song.liked_by.id)
           ? '<button class="hide-btn" data-track-id="' + song.track.id + '" data-liked-by="' + song.liked_by.id + '" title="Hide from feed">&times;</button>'
           : '';
 
@@ -152,8 +154,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (data.comments && data.comments.length > 0) {
           listEl.innerHTML = data.comments
-            .map(function (c) {
-              return '<div class="comment"><strong>' + esc(c.userName) + '</strong><span>' + esc(c.text) + '</span><span class="comment-time">' + timeAgo(c.timestamp) + '</span></div>';
+            .map(function (c, idx) {
+              var deleteBtn = (currentUserId && c.userId === currentUserId)
+                ? '<button class="comment-delete" data-track-id="' + song.track.id + '" data-liked-by="' + song.liked_by.id + '" data-index="' + idx + '" title="Delete comment">&times;</button>'
+                : '';
+              return '<div class="comment"><strong>' + esc(c.userName) + '</strong><span>' + esc(c.text) + '</span><span class="comment-time">' + timeAgo(c.timestamp) + '</span>' + deleteBtn + '</div>';
             })
             .join('');
         } else {
@@ -209,9 +214,11 @@ document.addEventListener('DOMContentLoaded', function () {
       if (data.ok && data.comment) {
         var commentKey = trackId + '-' + likedBy;
         var listEl = document.getElementById('comments-' + commentKey);
+        var idx = listEl.querySelectorAll('.comment').length;
         var commentEl = document.createElement('div');
         commentEl.className = 'comment';
-        commentEl.innerHTML = '<strong>' + esc(data.comment.userName) + '</strong><span>' + esc(data.comment.text) + '</span><span class="comment-time">just now</span>';
+        commentEl.innerHTML = '<strong>' + esc(data.comment.userName) + '</strong><span>' + esc(data.comment.text) + '</span><span class="comment-time">just now</span>' +
+          '<button class="comment-delete" data-track-id="' + trackId + '" data-liked-by="' + likedBy + '" data-index="' + idx + '" title="Delete comment">&times;</button>';
         listEl.appendChild(commentEl);
         input.value = '';
       }
@@ -220,6 +227,32 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     input.disabled = false;
+  }
+
+  async function handleDeleteComment(btn) {
+    var trackId = btn.dataset.trackId;
+    var likedBy = btn.dataset.likedBy;
+    var index = parseInt(btn.dataset.index, 10);
+    var commentEl = btn.closest('.comment');
+
+    try {
+      var res = await fetch('/api/delete-comment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trackId: trackId, likedByUserId: likedBy, index: index }),
+      });
+
+      if (res.ok) {
+        commentEl.style.transition = 'opacity 0.2s';
+        commentEl.style.opacity = '0';
+        setTimeout(function () { commentEl.remove(); }, 200);
+      } else {
+        var data = await res.json();
+        showToast(data.error || 'Failed to delete comment', true);
+      }
+    } catch (err) {
+      showToast('Failed to delete comment', true);
+    }
   }
 
   function showError(message) {

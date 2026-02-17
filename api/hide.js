@@ -20,6 +20,11 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Missing trackId or likedByUserId' });
   }
 
+  // Only allow hiding your own liked tracks
+  if (currentUserId !== likedByUserId) {
+    return res.status(403).json({ error: 'You can only hide your own tracks' });
+  }
+
   var redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL,
     token: process.env.UPSTASH_REDIS_REST_TOKEN,
