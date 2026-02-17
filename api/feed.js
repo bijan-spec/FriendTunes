@@ -1,9 +1,4 @@
-import { Redis } from '@upstash/redis';
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+const { Redis } = require('@upstash/redis');
 
 async function refreshAccessToken(refreshToken) {
   const res = await fetch('https://accounts.spotify.com/api/token', {
@@ -20,11 +15,14 @@ async function refreshAccessToken(refreshToken) {
     }),
   });
 
-  if (!res.ok) return null;
+  if (!res.ok) {
+    console.error('Token refresh failed:', res.status, await res.text());
+    return null;
+  }
   return res.json();
 }
 
-async function getUserLikedSongs(userData) {
+async function getUserLikedSongs(userData, redis) {
   const tokens = await refreshAccessToken(userData.refresh_token);
   if (!tokens) return [];
 
@@ -38,62 +36,79 @@ async function getUserLikedSongs(userData) {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
 
-  if (!res.ok) return [];
+  if (!res.ok) {
+    console.error('Liked songs fetch failed for', userData.id, ':', res.status);
+    return [];
+  }
 
   const data = await res.json();
 
-  return data.items.map((item) => ({
-    added_at: item.added_at,
-    track: {
-      id: item.track.id,
-      name: item.track.name,
-      artists: item.track.artists.map((a) => a.name),
-      album: {
-        name: item.track.album.name,
-        image: item.track.album.images?.[1]?.url || item.track.album.images?.[0]?.url,
+  return data.items.map(function (item) {
+    return {
+      added_at: item.added_at,
+      track: {
+        id: item.track.id,
+        name: item.track.name,
+        artists: item.track.artists.map(function (a) { return a.name; }),
+        album: {
+          name: item.track.album.name,
+          image: (item.track.album.images && item.track.album.images[1]
+            ? item.track.album.images[1].url
+            : (item.track.album.images && item.track.album.images[0]
+              ? item.track.album.images[0].url
+              : null)),
+        },
+        uri: item.track.uri,
+        external_url: item.track.external_urls ? item.track.external_urls.spotify : null,
       },
-      uri: item.track.uri,
-      external_url: item.track.external_urls?.spotify,
-    },
-    liked_by: {
-      id: userData.id,
-      name: userData.name,
-      image: userData.image,
-    },
-  }));
+      liked_by: {
+        id: userData.id,
+        name: userData.name,
+        image: userData.image,
+      },
+    };
+  });
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+
   try {
+    console.log('Feed: fetching users from Redis...');
     const usersHash = await redis.hgetall('users');
 
     if (!usersHash || Object.keys(usersHash).length === 0) {
+      console.log('Feed: no users found');
       return res.json({ songs: [], users: [] });
     }
 
-    const users = Object.values(usersHash).map((u) =>
-      typeof u === 'string' ? JSON.parse(u) : u
-    );
+    const users = Object.values(usersHash).map(function (u) {
+      return typeof u === 'string' ? JSON.parse(u) : u;
+    });
+
+    console.log('Feed: found', users.length, 'users');
 
     // Fetch liked songs from all users in parallel
     const allSongsArrays = await Promise.all(
-      users.map((user) => getUserLikedSongs(user))
+      users.map(function (user) { return getUserLikedSongs(user, redis); })
     );
 
     // Flatten and sort by added_at descending
     const allSongs = allSongsArrays
       .flat()
-      .sort((a, b) => new Date(b.added_at) - new Date(a.added_at));
+      .sort(function (a, b) { return new Date(b.added_at) - new Date(a.added_at); });
 
-    const userList = users.map((u) => ({
-      id: u.id,
-      name: u.name,
-      image: u.image,
-    }));
+    var userList = users.map(function (u) {
+      return { id: u.id, name: u.name, image: u.image };
+    });
 
+    console.log('Feed: returning', allSongs.length, 'songs');
     res.json({ songs: allSongs, users: userList });
   } catch (err) {
-    console.error('Feed error:', err);
+    console.error('Feed error:', err.message, err.stack);
     res.status(500).json({ error: 'Failed to load feed' });
   }
-}
+};

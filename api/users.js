@@ -1,11 +1,11 @@
-import { Redis } from '@upstash/redis';
+const { Redis } = require('@upstash/redis');
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+module.exports = async function handler(req, res) {
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
 
-export default async function handler(req, res) {
   try {
     const usersHash = await redis.hgetall('users');
 
@@ -13,8 +13,8 @@ export default async function handler(req, res) {
       return res.json({ users: [] });
     }
 
-    const users = Object.values(usersHash).map((u) => {
-      const parsed = typeof u === 'string' ? JSON.parse(u) : u;
+    const users = Object.values(usersHash).map(function (u) {
+      var parsed = typeof u === 'string' ? JSON.parse(u) : u;
       return {
         id: parsed.id,
         name: parsed.name,
@@ -23,9 +23,9 @@ export default async function handler(req, res) {
       };
     });
 
-    res.json({ users });
+    res.json({ users: users });
   } catch (err) {
-    console.error('Users error:', err);
+    console.error('Users error:', err.message, err.stack);
     res.status(500).json({ error: 'Failed to load users' });
   }
-}
+};

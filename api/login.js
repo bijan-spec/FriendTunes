@@ -1,4 +1,4 @@
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const redirectUri = `${process.env.APP_URL}/api/callback`;
   const scope = 'user-library-read user-read-private';
@@ -14,4 +14,4 @@ export default function handler(req, res) {
   });
 
   res.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`);
-}
+};
