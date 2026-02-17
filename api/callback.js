@@ -80,6 +80,11 @@ module.exports = async function handler(req, res) {
     await redis.hset('users', { [profile.id]: JSON.stringify(userData) });
     console.log('User stored in Redis:', profile.id);
 
+    // Set session cookie
+    res.setHeader('Set-Cookie',
+      'rf_user=' + encodeURIComponent(profile.id) + '; Path=/; SameSite=Lax; Max-Age=31536000'
+    );
+
     res.redirect('/?connected=true');
   } catch (err) {
     console.error('Callback error:', err.message, err.stack);
