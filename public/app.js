@@ -3,6 +3,22 @@ document.addEventListener('DOMContentLoaded', function () {
   var loadingEl = document.getElementById('loading');
   var friendsBar = document.getElementById('friendsBar');
 
+  // About modal
+  var aboutLink = document.getElementById('aboutLink');
+  var aboutModal = document.getElementById('aboutModal');
+  var aboutClose = document.getElementById('aboutClose');
+
+  aboutLink.addEventListener('click', function (e) {
+    e.preventDefault();
+    aboutModal.classList.add('open');
+  });
+  aboutClose.addEventListener('click', function () {
+    aboutModal.classList.remove('open');
+  });
+  aboutModal.addEventListener('click', function (e) {
+    if (e.target === aboutModal) aboutModal.classList.remove('open');
+  });
+
   // Session: read logged-in user from cookie
   var currentUserId = getLoggedInUserId();
 

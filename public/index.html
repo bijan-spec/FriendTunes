@@ -11,10 +11,22 @@
 </head>
 <body>
     <div class="app">
+        <a href="#" class="about-link" id="aboutLink">About</a>
+
         <header>
             <h1>RadioFam</h1>
             <a href="/api/login" class="connect-link">+ Connect Spotify</a>
         </header>
+
+        <div class="about-modal" id="aboutModal">
+            <div class="about-content">
+                <button class="about-close" id="aboutClose">&times;</button>
+                <h2>RadioFam</h2>
+                <p>I built this so my friends and I can see what each other is listening to. Every time you like a song on Spotify, it shows up here for the group to see, play, and comment on.</p>
+                <p><strong>To get started:</strong> Click "+ Connect Spotify" and log in with your Spotify account. That's it. Your liked songs will start appearing in the feed.</p>
+                <p class="about-credit">Made by Bijan</p>
+            </div>
+        </div>
 
         <div class="friends-bar" id="friendsBar"></div>
 
