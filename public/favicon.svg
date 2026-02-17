@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Heart shape -->
+  <path d="M32 56 C12 40 4 28 4 18 C4 10 10 4 18 4 C24 4 28 8 32 14 C36 8 40 4 46 4 C54 4 60 10 60 18 C60 28 52 40 32 56Z" fill="#1DB954"/>
+  <!-- Radio waves -->
+  <path d="M22 22 Q18 16 22 10" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M28 20 Q25 16 28 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Music note -->
+  <circle cx="38" cy="38" r="4" fill="white"/>
+  <rect x="41" y="22" width="2.5" height="16" rx="1" fill="white"/>
+  <path d="M41.5 22 Q48 18 48 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
